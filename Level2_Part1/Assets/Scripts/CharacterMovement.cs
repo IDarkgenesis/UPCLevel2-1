@@ -16,37 +16,38 @@ public class CharacterMovement : MonoBehaviour
         controller = gameObject.GetComponent<CharacterController>();
     }
 
+    public float speed = 3.0F;
+    public float rotateSpeed = 3.0F;
+
     void Update()
     {
-        groundedPlayer = controller.isGrounded;
-        if (groundedPlayer && playerVelocity.y < 0)
-        {
-            playerVelocity.y = 0f;
-        }
+        CharacterController controller = GetComponent<CharacterController>();
 
+       
         Vector3 move = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        controller.Move(move * Time.deltaTime * playerSpeed);
 
+        //Vector3 forward = transform.TransformDirection(Vector3.forward);
         if (move != Vector3.zero)
         {
             gameObject.transform.forward = move;
         }
+        controller.SimpleMove(move * playerSpeed);
 
-        // Makes the Dash
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space)) 
         {
+            Debug.Log("Press");
             StartCoroutine(Dash());
         }
-       
     }
 
     private IEnumerator Dash()
     {
+        //FIX DASH TODO 
         float startTime = Time.time;
         while (startTime + dashTime > Time.time)
         {
-            Vector3 moveDirection = transform.forward * dashMeters;
-            controller.Move(moveDirection * Time.deltaTime * playerSpeed);
+            Vector3 moveDirection = transform.forward * dashMeters * playerSpeed;
+            controller.SimpleMove(moveDirection);
             yield break;
         }
     }

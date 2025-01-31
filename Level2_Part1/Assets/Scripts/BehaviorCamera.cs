@@ -8,11 +8,12 @@ public class BehaviorCamera : MonoBehaviour
     public Transform lookoutTarget;
     public GameObject lookoutPrefab;
     public float zoomOutSize = 10f;
+    [SerializeField] float zoomInSize = 10f;
     public float moveSpeed = 2f;
     public float zoomSpeed = 2f;
     public KeyCode lookoutKey = KeyCode.L;
 
-    private float originalSize;
+    [SerializeField]private float originalSize;
     private Vector3 originalPosition;
     private bool isLookingOut = false;
 
@@ -23,26 +24,52 @@ public class BehaviorCamera : MonoBehaviour
 
         originalSize = orthoCamera.orthographicSize;
         originalPosition = orthoCamera.transform.position;
-        lookoutPrefab.SetActive(false);
+        
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            isLookingOut=true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            isLookingOut = false;
+            StartCoroutine(SmoothZoomIn());  
+        }
+
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(lookoutKey))
-        {
-            isLookingOut = !isLookingOut;
-            lookoutPrefab.SetActive(isLookingOut);
-        }
+       
 
         if (isLookingOut)
         {
             orthoCamera.orthographicSize = Mathf.Lerp(orthoCamera.orthographicSize, zoomOutSize, Time.deltaTime * zoomSpeed);
             orthoCamera.transform.position = Vector3.Lerp(orthoCamera.transform.position, new Vector3(lookoutTarget.position.x, orthoCamera.transform.position.y, lookoutTarget.position.z), Time.deltaTime * moveSpeed);
         }
-        else
+       
+
+    }
+
+    IEnumerator SmoothZoomIn()
+    {
+        float elapsedTime = 0f;
+        float startSize = orthoCamera.orthographicSize;
+
+        while (elapsedTime < 1f)
         {
-            orthoCamera.orthographicSize = Mathf.Lerp(orthoCamera.orthographicSize, originalSize, Time.deltaTime * zoomSpeed);
-            orthoCamera.transform.position = Vector3.Lerp(orthoCamera.transform.position, originalPosition, Time.deltaTime * moveSpeed);
+            orthoCamera.orthographicSize = Mathf.Lerp(startSize, zoomInSize, elapsedTime * zoomSpeed);
+            elapsedTime += Time.deltaTime;
+            yield return null;
         }
+
+        orthoCamera.orthographicSize = zoomInSize;
     }
 }

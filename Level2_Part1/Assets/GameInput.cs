@@ -24,4 +24,10 @@ public class GameInput : MonoBehaviour
         bool Dash = playerActions.Player.Dash.WasPressedThisFrame();
         return Dash;
     }
+
+    public bool GetAttack()
+    {
+        bool atk = playerActions.Player.Attack.WasPressedThisFrame();
+        return atk;
+    }
 }

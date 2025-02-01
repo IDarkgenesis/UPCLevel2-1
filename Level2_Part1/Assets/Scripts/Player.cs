@@ -1,6 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Player : MonoBehaviour, IDamage
 {
@@ -21,10 +21,19 @@ public class Player : MonoBehaviour, IDamage
     bool isAttacking;
     float maxFallSpeed = -50f;
 
+    private Vector3 originalScale;
+    private Material playerMaterial;
+    private Color originalColor;
+
+    [SerializeField] private PlayerDamage weapon;
+
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
         currentHealth = healthPoints;
+        originalScale = transform.localScale;
+        playerMaterial = GetComponentInChildren<Renderer>().material;
+        originalColor = playerMaterial.color;
     }
 
     private void Update()
@@ -32,7 +41,13 @@ public class Player : MonoBehaviour, IDamage
         Vector2 inputVector = gameInput.GetMovementVectorNormalized();
         Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
         bool dashButton = gameInput.GetDash();
-        isAttacking = gameInput.GetAttack();
+
+        if (gameInput.GetAttack())
+        {
+            isAttacking = true;
+            weapon.ActivateWeapon();
+            Invoke("ResetAttack", 0.3f); // Se resetea después de 0.3 segundos (ajustar según animación)
+        }
 
         if (moveDir != Vector3.zero)
         {
@@ -40,7 +55,6 @@ public class Player : MonoBehaviour, IDamage
         }
         else
         {
-            
             playerSpeed = Mathf.Max(0, playerSpeed - friction * Time.deltaTime);
         }
 
@@ -53,7 +67,6 @@ public class Player : MonoBehaviour, IDamage
             velocity.y = -2f;
         }
 
-       
         velocity.y += gravity * Time.deltaTime;
         velocity.y = Mathf.Max(velocity.y, maxFallSpeed);
 
@@ -65,32 +78,35 @@ public class Player : MonoBehaviour, IDamage
             gameObject.transform.forward = Vector3.Slerp(transform.forward, moveDir, rotationSpeed * Time.deltaTime);
         }
 
-
         if (dashButton && moveDir != Vector3.zero)
         {
             controller.Move(moveDir * dashForce);
         }
-
-      
-          
-        
     }
 
-    public bool IsWalking()
-    {
-        return isMoving;
-    }
-
-    public bool IsAttacking()
-    {
-        return isAttacking;
-    }
-    
+    public bool IsWalking() => isMoving;
+    public bool IsAttacking() => isAttacking;
 
     public void Damage(float damage)
     {
-         currentHealth = healthPoints - damage;
-        healthPoints = currentHealth;
-       
+        currentHealth -= damage;
+
+        Sequence damageSequence = DOTween.Sequence();
+        damageSequence.Append(transform.DOScale(originalScale * 0.8f, 0.1f))
+                      .Append(transform.DOScale(originalScale, 0.1f));
+
+        playerMaterial.DOColor(Color.red, 0.1f).OnComplete(() =>
+        {
+            playerMaterial.DOColor(originalColor, 0.5f);
+        });
+
+        if (currentHealth <= 0)
+        {
+            Destroy(gameObject);
+        }
+    }
+    private void ResetAttack()
+    {
+        isAttacking = false;
     }
 }

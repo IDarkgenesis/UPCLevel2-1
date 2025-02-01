@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-
+using DG.Tweening;
 enum ENEMYTYPE { ARCHER, MELEE}
 public class FollowPlayer : MonoBehaviour, IDamage
 {
@@ -17,6 +17,9 @@ public class FollowPlayer : MonoBehaviour, IDamage
     [SerializeField] private ENEMYTYPE type;
     [SerializeField] private float enemyHealthPoints;
     [SerializeField] private float currentHealthPoints;
+    [SerializeField] private ParticleSystem dustParticles;
+
+    private Vector3 originalScale;
     private bool canShoot = true;
     private bool isTackling = false;
 
@@ -25,6 +28,7 @@ public class FollowPlayer : MonoBehaviour, IDamage
         agent = GetComponent<NavMeshAgent>();
         target = FindObjectOfType<Player>();
         enemyHealthPoints = currentHealthPoints;
+        originalScale = transform.localScale;
     }
 
     void Update()
@@ -56,11 +60,24 @@ public class FollowPlayer : MonoBehaviour, IDamage
     IEnumerator AttackMelee()
     {
         isTackling = true;
-        agent.isStopped = true; 
+        agent.isStopped = true;
 
-        float tackleDuration = 0.5f; 
+        // Squash antes del ataque
+        transform.DOScale(new Vector3(originalScale.x * 1.6f, originalScale.y * 0.8f, originalScale.z * 0.5f), 0.2f)
+            .OnComplete(() =>
+            {
+                transform.DOScale(originalScale, 0.1f);
+            });
+
+        yield return new WaitForSeconds(0.3f);
+
+        if (dustParticles != null)
+        {
+            Instantiate(dustParticles, transform.position, Quaternion.identity);
+        }
+
+        float tackleDuration = 0.5f;
         float elapsedTime = 0f;
-
         Vector3 tackleDirection = (target.transform.position - transform.position).normalized;
 
         while (elapsedTime < tackleDuration)
@@ -75,7 +92,7 @@ public class FollowPlayer : MonoBehaviour, IDamage
             yield return null;
         }
 
-        agent.isStopped = false; 
+        agent.isStopped = false;
         isTackling = false;
     }
 
@@ -83,14 +100,24 @@ public class FollowPlayer : MonoBehaviour, IDamage
     {
         canShoot = false;
 
-       
-        GameObject projectile = Instantiate(projectilePrefab, shootPoint.position, Quaternion.identity);
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        // Squash antes de disparar
+        transform.DOScale(new Vector3(originalScale.x * 1.2f, originalScale.y * 0.8f, originalScale.z * 1.2f), 0.2f)
+            .OnComplete(() =>
+            {
+                transform.DOScale(originalScale, 0.1f);
+            });
+
+        yield return new WaitForSeconds(0.2f);
+
         Vector3 direction = (target.transform.position - shootPoint.position).normalized;
 
+      
+        GameObject projectile = Instantiate(projectilePrefab, shootPoint.position, Quaternion.LookRotation(direction));
+
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.velocity = direction * 10f; 
+            rb.velocity = direction * 10f;
         }
 
         yield return new WaitForSeconds(shootCooldown);

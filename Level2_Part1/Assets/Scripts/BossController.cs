@@ -7,7 +7,7 @@ using UnityEngine.AI;
 public class BossController : MonoBehaviour, IDamage
 {
 
-    [SerializeField] private float strikeRange = 5f;
+    [SerializeField] private float strikeRange = 8f;
     [SerializeField] private float dashRange = 15f;
     [SerializeField] private float distanceToPlayer = 0;
     [SerializeField] private float maximumHealthPoints = 10;
@@ -15,7 +15,7 @@ public class BossController : MonoBehaviour, IDamage
     [SerializeField] private State currentState = State.Idle;
     [SerializeField] private float dashTrackingDuration = 2f;
     [SerializeField] private float baseSpeed = 3.5f;
-    [SerializeField] private float dashSpeed = 10f;
+    [SerializeField] private float dashSpeed = 25f;
 
     private Player player;
     private NavMeshAgent agent;
@@ -40,7 +40,6 @@ public class BossController : MonoBehaviour, IDamage
     // Update is called once per frame
     void Update()
     {
-
         if (!agent.pathPending && (currentState == State.Dashing || currentState == State.Striking))
         {
             if (agent.remainingDistance <= agent.stoppingDistance)
@@ -60,7 +59,8 @@ public class BossController : MonoBehaviour, IDamage
 
             if (distanceToPlayer <= strikeRange)
             {
-
+                currentState = State.Striking;
+                StartCoroutine(StrikeAttack());
             }
             else if (distanceToPlayer <= dashRange)
             {
@@ -68,13 +68,27 @@ public class BossController : MonoBehaviour, IDamage
                 StartCoroutine(DashAttack());
             }
         }
-        else if (currentState == State.Idle && !canAttack) FaceTarget();
+        else if (currentState == State.Idle && !canAttack) FacePlayerSmooth();
 
         if (currentHealthPoints <= 0) Destroy(gameObject);
     }
     private void FaceTarget()
     {
         Vector3 direction = (currentTarget - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y));
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
+    }
+
+    private void FacePlayer()
+    {
+        Vector3 direction = (player.transform.position - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y));
+        transform.rotation = lookRotation;
+    }
+
+    private void FacePlayerSmooth()
+    {
+        Vector3 direction = (player.transform.position - transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
     }
@@ -96,13 +110,29 @@ public class BossController : MonoBehaviour, IDamage
 
         while (elapsedTime < dashTrackingDuration)
         {
-            FaceTarget();
+            FacePlayer();
             elapsedTime += Time.deltaTime;
         }
 
-        FaceTarget();
         currentTarget = player.transform.position;
         agent.speed = dashSpeed;
+        FaceTarget();
+        agent.SetDestination(currentTarget);
+
+        yield return null;
+    }
+
+    IEnumerator StrikeAttack()
+    {
+        canAttack = false;
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < 3f) elapsedTime += Time.deltaTime;
+
+        currentTarget = player.transform.position;
+        agent.speed = 5;
+        FaceTarget();
         agent.SetDestination(currentTarget);
 
         yield return null;

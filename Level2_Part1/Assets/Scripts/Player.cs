@@ -40,6 +40,9 @@ public class Player : MonoBehaviour, IDamage
     {
         Vector2 inputVector = gameInput.GetMovementVectorNormalized();
         Vector3 moveDir = new Vector3(inputVector.x, 0, inputVector.y);
+        moveDir = Camera.main.transform.right * inputVector.x + Camera.main.transform.forward * inputVector.y;
+        moveDir.y = 0;
+        moveDir.Normalize();
         bool dashButton = gameInput.GetDash();
 
         if (gameInput.GetAttack())

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class BossController : MonoBehaviour, IDamage
 {
@@ -15,12 +16,20 @@ public class BossController : MonoBehaviour, IDamage
     [SerializeField] private State currentState = State.Idle;
     [SerializeField] private float dashTrackingDuration = 2f;
     [SerializeField] private float baseSpeed = 3.5f;
+    [SerializeField] private float strikeSpeed = 15f;
     [SerializeField] private float dashSpeed = 25f;
 
     private Player player;
     private NavMeshAgent agent;
     private Vector3 currentTarget;
     private bool canAttack = true;
+
+    MeshRenderer slashMeshRenderer;
+    BoxCollider slashCollider;
+
+    MeshRenderer dashXZRenderer;
+    MeshRenderer dashYZRenderer;
+    BoxCollider dashCollider;
     enum State
     {
         Idle,
@@ -35,6 +44,21 @@ public class BossController : MonoBehaviour, IDamage
         agent = GetComponent<NavMeshAgent>();
         currentHealthPoints = maximumHealthPoints;
         currentState = State.Idle;
+
+        GameObject slashAttackCObject = gameObject.transform.Find("SlashAttack").gameObject;
+        slashMeshRenderer = slashAttackCObject.GetComponent<MeshRenderer>();
+        slashMeshRenderer.enabled = false;
+
+        slashCollider = slashAttackCObject.GetComponent<BoxCollider>();
+        slashCollider.enabled = false;
+
+        dashXZRenderer = gameObject.transform.Find("DashSpriteXZ").gameObject.GetComponent<MeshRenderer>();
+        dashYZRenderer = gameObject.transform.Find("DashSpriteYZ").gameObject.GetComponent<MeshRenderer>();
+        dashCollider = gameObject.transform.Find("DashHitbox").gameObject.GetComponent<BoxCollider>();
+
+        dashXZRenderer.enabled = false;
+        dashYZRenderer.enabled = false;
+        dashCollider.enabled = false;
     }
 
     // Update is called once per frame
@@ -49,6 +73,10 @@ public class BossController : MonoBehaviour, IDamage
                     currentState = State.Idle;
                     Invoke(nameof(ResetCanAttack), 2f);
                     agent.speed = baseSpeed;
+
+                    dashXZRenderer.enabled = false;
+                    dashYZRenderer.enabled = false;
+                    dashCollider.enabled = false;
                 }
             }
         }
@@ -60,6 +88,7 @@ public class BossController : MonoBehaviour, IDamage
             if (distanceToPlayer <= strikeRange)
             {
                 currentState = State.Striking;
+               
                 StartCoroutine(StrikeAttack());
             }
             else if (distanceToPlayer <= dashRange)
@@ -108,6 +137,7 @@ public class BossController : MonoBehaviour, IDamage
 
         float elapsedTime = 0f;
 
+        // Time spent "tracking" the player
         while (elapsedTime < dashTrackingDuration)
         {
             FacePlayer();
@@ -118,6 +148,10 @@ public class BossController : MonoBehaviour, IDamage
         agent.speed = dashSpeed;
         FaceTarget();
         agent.SetDestination(currentTarget);
+
+        dashXZRenderer.enabled = true;
+        dashYZRenderer.enabled = true;
+        dashCollider.enabled = true;
 
         yield return null;
     }
@@ -131,9 +165,29 @@ public class BossController : MonoBehaviour, IDamage
         while (elapsedTime < 3f) elapsedTime += Time.deltaTime;
 
         currentTarget = player.transform.position;
-        agent.speed = 5;
+        agent.speed = strikeSpeed;
         FaceTarget();
         agent.SetDestination(currentTarget);
+
+        yield return new WaitForSeconds(0.15f);
+
+        slashCollider.enabled = true;
+        slashMeshRenderer.enabled = true;
+
+        yield return new WaitForSeconds(0.15f);
+
+        slashCollider.enabled = false;
+        slashMeshRenderer.enabled = false;
+
+        yield return new WaitForSeconds(0.15f);
+
+        slashCollider.enabled = true;
+        slashMeshRenderer.enabled = true;
+
+        yield return new WaitForSeconds(0.15f);
+
+        slashCollider.enabled = false;
+        slashMeshRenderer.enabled = false;
 
         yield return null;
     }

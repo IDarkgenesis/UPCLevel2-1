@@ -7,22 +7,26 @@ using UnityEngine.UIElements;
 
 public class BossController : MonoBehaviour, IDamage
 {
+    [SerializeField] private AudioClip damageSoundClip;
 
     [SerializeField] private float strikeRange = 8f;
-    [SerializeField] private float dashRange = 15f;
-    [SerializeField] private float distanceToPlayer = 0;
     [SerializeField] private float maximumHealthPoints = 10;
     [SerializeField] private float currentHealthPoints = 10;
-    [SerializeField] private State currentState = State.Idle;
+
     [SerializeField] private float dashTrackingDuration = 2f;
     [SerializeField] private float baseSpeed = 3.5f;
-    [SerializeField] private float strikeSpeed = 15f;
     [SerializeField] private float dashSpeed = 25f;
 
+    [SerializeField] private float strikeTrackingDuration = 3f;
+    [SerializeField] private float strikeSpeed = 15f;
+    [SerializeField] private float dashRange = 15f; 
+    
     private Player player;
     private NavMeshAgent agent;
     private Vector3 currentTarget;
     private bool canAttack = true;
+    private float distanceToPlayer = 0;
+    private State currentState = State.Idle;
 
     MeshRenderer slashMeshRenderer;
     BoxCollider slashCollider;
@@ -162,7 +166,7 @@ public class BossController : MonoBehaviour, IDamage
 
         float elapsedTime = 0f;
 
-        while (elapsedTime < 3f) elapsedTime += Time.deltaTime;
+        while (elapsedTime < strikeTrackingDuration) elapsedTime += Time.deltaTime;
 
         currentTarget = player.transform.position;
         agent.speed = strikeSpeed;
@@ -199,6 +203,7 @@ public class BossController : MonoBehaviour, IDamage
 
     public void Damage(float damage)
     {
+        AudioSource.PlayClipAtPoint(damageSoundClip, transform.position, 1f);
         currentHealthPoints -= damage;
     }
 }

@@ -4,6 +4,9 @@ using DG.Tweening;
 
 public class Player : MonoBehaviour, IDamage
 {
+    [SerializeField] AudioClip hitAudioClip;
+    [SerializeField] AudioClip deathAudioClip;
+
     [SerializeField] float playerSpeed = 5f;
     [SerializeField] float healthPoints = 1000000;
     [SerializeField] float currentHealth;
@@ -94,6 +97,8 @@ public class Player : MonoBehaviour, IDamage
     {
         currentHealth -= damage;
 
+        AudioSource.PlayClipAtPoint(hitAudioClip, transform.position, 1f);
+
         Sequence damageSequence = DOTween.Sequence();
         damageSequence.Append(transform.DOScale(originalScale * 0.8f, 0.1f))
                       .Append(transform.DOScale(originalScale, 0.1f));
@@ -105,6 +110,7 @@ public class Player : MonoBehaviour, IDamage
 
         if (currentHealth <= 0)
         {
+            AudioSource.PlayClipAtPoint(deathAudioClip, transform.position, 1f);
             Destroy(gameObject);
         }
     }

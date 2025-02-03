@@ -11,6 +11,9 @@ GameObject:
   - component: {fileID: 390902583409164715}
   - component: {fileID: 8027826942295973263}
   - component: {fileID: 9101088218843833976}
+  - component: {fileID: 3507931470180974108}
+  - component: {fileID: 4645477931982856591}
+  - component: {fileID: 4486401052551254070}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -28,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1021078724177596064}
@@ -46,7 +49,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e5d9427b8a85c940b4ef38ce4092867, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerSpeed: 7
+  hitAudioClip: {fileID: 8300000, guid: deb29bcc67cc4ea46926298f839bf0f9, type: 3}
+  deathAudioClip: {fileID: 8300000, guid: e6fb0b5b79b481349832259397ce9c13, type: 3}
+  playerSpeed: 5
   healthPoints: 1000000
   currentHealth: 0
   maxSpeed: 10
@@ -55,7 +60,8 @@ MonoBehaviour:
   rotationSpeed: 10
   gameInput: {fileID: 0}
   acceleration: 2
-  friction: 5
+  friction: 2
+  weapon: {fileID: 8447765937548515583}
 --- !u!143 &9101088218843833976
 CharacterController:
   m_ObjectHideFlags: 0
@@ -75,13 +81,96 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2.14
+  m_Height: 1.96
   m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.93, z: -0.05}
+  m_Center: {x: 0, y: 1.04, z: -0.05}
+--- !u!54 &3507931470180974108
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863896687322555572}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &4645477931982856591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863896687322555572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73fe052c45ac8514ea5a6fb0c5e23f0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unityEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8027826942295973263}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
+        m_MethodName: Damage
+        m_Mode: 4
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 5
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  theTrigger: {fileID: 0}
+--- !u!114 &4486401052551254070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863896687322555572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73fe052c45ac8514ea5a6fb0c5e23f0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unityEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8027826942295973263}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
+        m_MethodName: Damage
+        m_Mode: 4
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 15
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  theTrigger: {fileID: 0}
 --- !u!1001 &9043413032324847372
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -138,17 +227,17 @@ PrefabInstance:
     - target: {fileID: 8334810020102068652, guid: 7446fc63649c2ee48b182b2009c99608,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 1.25
       objectReference: {fileID: 0}
     - target: {fileID: 8334810020102068652, guid: 7446fc63649c2ee48b182b2009c99608,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 1
+      value: 1.25
       objectReference: {fileID: 0}
     - target: {fileID: 8334810020102068652, guid: 7446fc63649c2ee48b182b2009c99608,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 1
+      value: 1.25
       objectReference: {fileID: 0}
     - target: {fileID: 8334810020102068652, guid: 7446fc63649c2ee48b182b2009c99608,
         type: 3}
@@ -199,6 +288,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8334810020102068652, guid: 7446fc63649c2ee48b182b2009c99608,
+        type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8710209211926872854, guid: 7446fc63649c2ee48b182b2009c99608,
         type: 3}
@@ -278,7 +372,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 0.06386842, y: 2.476845, z: 0.09478003}
   m_Center: {x: -0.0000006687872, y: -0.024480104, z: -0.00000011957404}
@@ -294,4 +388,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38048b0c0c9d7114084203599e2fd6e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponDamage: 0
+  weaponDamage: 5
+  box: {fileID: 8832659429483598929}
+  attackDuration: 0.2

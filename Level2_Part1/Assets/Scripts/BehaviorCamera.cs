@@ -24,7 +24,6 @@ public class BehaviorCamera : MonoBehaviour
 
         originalSize = orthoCamera.orthographicSize;
         originalPosition = orthoCamera.transform.position;
-        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -52,7 +51,8 @@ public class BehaviorCamera : MonoBehaviour
         if (isLookingOut)
         {
             orthoCamera.orthographicSize = Mathf.Lerp(orthoCamera.orthographicSize, zoomOutSize, Time.deltaTime * zoomSpeed);
-            orthoCamera.transform.position = Vector3.Lerp(orthoCamera.transform.position, new Vector3(lookoutTarget.position.x, orthoCamera.transform.position.y, lookoutTarget.position.z), Time.deltaTime * moveSpeed);
+            orthoCamera.transform.position = Vector3.Lerp(orthoCamera.transform.position, new Vector3(lookoutPrefab.transform.position.x, orthoCamera.transform.position.y, lookoutPrefab.transform.position.z), Time.deltaTime * moveSpeed);
+            orthoCamera.nearClipPlane = -100;
         }
        
 
